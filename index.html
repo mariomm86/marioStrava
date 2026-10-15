@@ -664,10 +664,10 @@ svg.leaflet-image-layer.leaflet-interactive path {
 	}
 </style>
 <style>
-:root{--ink:#1d2433;--panel:#ffffffee;--line:#d5d9e0;--muted:#5b6475}
+:root{--ink:#1d2433;--panel:#ffffffee;--line:#d5d9e0;--muted:#5b6475;--accent:#e8590c;--gal:300px}
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;font:14px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink)}
-#map{position:absolute;inset:0;background:#e9e6df}
+#map{position:absolute;top:0;left:0;bottom:0;right:var(--gal);background:#e9e6df}
 .panel{position:absolute;z-index:1000;top:12px;left:56px;width:250px;max-width:calc(100% - 70px);background:var(--panel);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:8px;padding:12px 14px;box-shadow:0 2px 10px #0002}
 .panel h1{font-size:15px;margin:0 0 2px}
 .panel .sub{color:var(--muted);font-size:12px;margin-bottom:10px}
@@ -676,23 +676,43 @@ select,button{font:inherit;padding:4px 8px;border:1px solid var(--line);border-r
 button{cursor:pointer;max-width:none}button:hover{background:#f0f2f5}
 .btns{display:flex;gap:6px;margin-top:10px}.btns button{flex:1}
 input[type=range]{width:110px}
-
+.chk{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-top:8px}
+.note{font-size:11px;color:var(--muted);margin-top:4px}
 .leaflet-top.leaflet-left{top:0}
-.cam{width:30px;height:30px;border-radius:50%;background:#1d2433;border:2px solid #fff;box-shadow:0 1px 5px #0006;display:flex;align-items:center;justify-content:center;color:#fff;font:600 11px system-ui;position:relative}
-.cam svg{width:15px;height:15px;fill:none;stroke:#fff;stroke-width:2;stroke-linejoin:round}
-.cam b{position:absolute;right:-6px;top:-6px;background:#e8590c;border-radius:9px;min-width:16px;height:16px;padding:0 4px;font-size:10px;line-height:16px;text-align:center}
-.pop{width:260px}.pop h3{margin:0 0 2px;font:600 14px system-ui}.pop p{margin:0 0 8px;color:#5b6475;font-size:11px}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-height:240px;overflow:auto}
-.grid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:4px;cursor:zoom-in;display:block;background:#e9e6df}
+.cam{width:28px;height:28px;border-radius:50%;background:#1d2433;border:2px solid #fff;box-shadow:0 1px 5px #0006;display:flex;align-items:center;justify-content:center;position:relative}
+.cam svg{width:14px;height:14px;fill:none;stroke:#fff;stroke-width:2;stroke-linejoin:round}
+.cam b{position:absolute;right:-6px;top:-6px;background:var(--accent);color:#fff;border-radius:9px;min-width:16px;height:16px;padding:0 4px;font:600 10px/16px system-ui;text-align:center}
+.cam.sel{background:var(--accent);transform:scale(1.15)}
+/* gallery */
+#gal{position:absolute;top:0;right:0;bottom:0;width:var(--gal);background:#fff;border-left:1px solid var(--line);display:flex;flex-direction:column;z-index:1000}
+#gal header{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:2px}
+#gal h2{margin:0;font-size:14px}
+#gal .cnt{color:var(--muted);font-size:12px}
+#gal .clear{margin-top:8px;align-self:flex-start;font-size:12px;padding:3px 10px}
+#gl{flex:1;overflow:auto;padding:10px 12px 16px}
+.grp{margin-bottom:14px}
+.grp h3{margin:0 0 6px;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between}
+.grp h3 button{border:0;background:none;padding:0;color:var(--accent);font:inherit;text-transform:none;letter-spacing:0;cursor:pointer}
+.tg{display:grid;grid-template-columns:repeat(2,1fr);gap:5px}
+.tg img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:4px;cursor:zoom-in;display:block;background:#e9e6df}
+.tg img:hover{outline:2px solid var(--accent)}
+.empty{color:var(--muted);font-size:13px;padding:20px 4px}
+/* lightbox */
 #lb{position:fixed;inset:0;z-index:3000;background:#000d;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px}
 #lb[hidden]{display:none}
 #lb img{max-width:92vw;max-height:80vh;border-radius:4px}
-#lb .bar{display:flex;gap:8px;align-items:center;color:#fff;font-size:13px}
+#lb .bar{display:flex;gap:8px;align-items:center;color:#fff;font-size:13px;flex-wrap:wrap;justify-content:center}
 #lb button{background:#fff2;color:#fff;border:1px solid #fff5;padding:6px 14px}
 #lb button:hover{background:#fff4}
-.chk{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-top:8px}
-.note{font-size:11px;color:var(--muted);margin-top:4px}
-
+@media (max-width:760px){
+  :root{--gal:0px}
+  #map{bottom:170px;right:0}
+  #gal{top:auto;left:0;width:auto;height:170px;border-left:0;border-top:1px solid var(--line)}
+  #gl{display:flex;gap:14px;overflow-x:auto;overflow-y:hidden;padding:8px 12px}
+  .grp{margin:0;flex:none}
+  .tg{display:flex}.tg img{width:96px;height:72px;aspect-ratio:auto}
+  .panel{left:12px;top:56px;max-width:calc(100% - 24px)}
+}
 </style></head><body>
 <div id="map"></div>
 <div class="panel">
@@ -702,11 +722,12 @@ input[type=range]{width:110px}
   <label class="f">Year <select id="year"></select></label>
   <label class="f">Line opacity <input id="op" type="range" min="0.1" max="1" step="0.05" value="0.5"></label>
   <label class="f">Line color <input id="col" type="color" value="#e8590c"></label>
-  <label class="chk"><input id="showph" type="checkbox" checked> <span>Photos (<span id="phn">0</span>)</span></label>
+  <label class="chk"><input id="showph" type="checkbox" checked> <span>Photo pins</span></label>
   <div class="note">Photo pins sit near the middle of each ride, not at the exact spot.</div>
   <div class="btns"><button id="home">Main area</button><button id="all">Show all</button></div>
 </div>
-<div id="lb" hidden><img id="lbi" alt=""><div class="bar"><button id="lbp">Prev</button><span id="lbc"></span><button id="lbn">Next</button><button id="lbx">Close</button></div></div>
+<aside id="gal"><header><h2 id="gh">Photos</h2><div class="cnt" id="gc"></div><button class="clear" id="gclear" hidden>Show all rides</button></header><div id="gl"></div></aside>
+<div id="lb" hidden><img id="lbi" alt=""><div class="bar"><button id="lbp">Prev</button><span id="lbc"></span><button id="lbn">Next</button><button id="lbr">Show ride</button><button id="lbx">Close</button></div></div>
 <script>/* @preserve
  * Leaflet 1.9.4, a JS library for interactive maps. https://leafletjs.com
  * (c) 2010-2023 Vladimir Agafonkin, (c) 2010-2011 CloudMade
@@ -735,60 +756,103 @@ if(!(saved>=0&&saved<BASES.length))saved=0;
 baseEl.value=saved;setBase(saved);
 baseEl.onchange=()=>setBase(+baseEl.value);
 
-const yearOf=a=>(a.d.match(/\d{4}/)||[''])[0];DATA.forEach(a=>a.y=yearOf(a));
-const canvas=L.canvas({padding:0.3,tolerance:4});
-let color='#e8590c',opacity=0.5;
+DATA.forEach((a,i)=>{a.i=i;a.y=(a.d.match(/\d{4}/)||[''])[0];a.ts=Date.parse(a.d)||0;
+  let s=90,w=180,n=-90,e=-180;a.p.forEach(seg=>seg.forEach(q=>{if(q[0]<s)s=q[0];if(q[0]>n)n=q[0];if(q[1]<w)w=q[1];if(q[1]>e)e=q[1]}));a.bb=L.latLngBounds([s,w],[n,e])});
+const canvas=L.canvas({padding:0.3,tolerance:5});
+let color='#e8590c',opacity=0.5,selected=null;
 const group=L.layerGroup().addTo(map);
 const lines=DATA.map(a=>{
   const pl=L.polyline(a.p,{renderer:canvas,color,weight:2.2,opacity});
-  pl.bindTooltip(a.d,{sticky:true});
-  pl.on('mouseover',()=>pl.setStyle({weight:5,opacity:1}).bringToFront());
-  pl.on('mouseout',()=>pl.setStyle({weight:2.2,opacity}));
-  return {a,pl};
+  pl.bindTooltip(a.d+(a.ph?' · '+a.ph.length+' photo'+(a.ph.length>1?'s':''):''),{sticky:true});
+  pl.on('mouseover',()=>{pl.setStyle({weight:5,opacity:1});pl.bringToFront()});
+  pl.on('mouseout',()=>styleOne(a.i));
+  pl.on('click',e=>{L.DomEvent.stopPropagation(e);select(selected===a.i?null:a.i)});
+  return pl;
 });
+function styleOne(i){
+  const pl=lines[i];
+  if(selected===null)pl.setStyle({color,weight:2.2,opacity});
+  else if(i===selected)pl.setStyle({color:'#c92a2a',weight:5,opacity:1});
+  else pl.setStyle({color,weight:2.2,opacity:0.12});
+}
+function styleAll(){lines.forEach((_,i)=>styleOne(i));if(selected!==null)lines[selected].bringToFront()}
+
 const camSvg='<svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
 const phGroup=L.layerGroup().addTo(map);
-const lb=document.getElementById('lb'),lbi=document.getElementById('lbi'),lbc=document.getElementById('lbc');
-let lbList=[],lbIdx=0,lbDay='';
-function lbShow(){lbi.src='photos/'+lbList[lbIdx];lbi.alt='Photo from the ride on '+lbDay;lbc.textContent=lbDay+'  ·  '+(lbIdx+1)+' / '+lbList.length}
-function lbOpen(list,i,day){lbList=list;lbIdx=i;lbDay=day;lbShow();lb.hidden=false}
-document.getElementById('lbp').onclick=()=>{lbIdx=(lbIdx+lbList.length-1)%lbList.length;lbShow()};
-document.getElementById('lbn').onclick=()=>{lbIdx=(lbIdx+1)%lbList.length;lbShow()};
-document.getElementById('lbx').onclick=()=>{lb.hidden=true};
-lb.addEventListener('click',e=>{if(e.target===lb)lb.hidden=true});
-document.addEventListener('keydown',e=>{if(lb.hidden)return;if(e.key==='Escape')lb.hidden=true;if(e.key==='ArrowLeft')document.getElementById('lbp').click();if(e.key==='ArrowRight')document.getElementById('lbn').click()});
 const markers=DATA.filter(a=>a.ph&&a.ph.length).map(a=>{
-  const mk=L.marker(a.m,{icon:L.divIcon({className:'',html:`<div class="cam">${camSvg}<b>${a.ph.length}</b></div>`,iconSize:[30,30],iconAnchor:[15,15]}),title:a.d+' · '+a.ph.length+' photo'+(a.ph.length>1?'s':'')});
-  mk.bindPopup(()=>{
-    const el=document.createElement('div');el.className='pop';
-    el.innerHTML=`<h3>${a.d}</h3><p>${a.ph.length} photo${a.ph.length>1?'s':''} from this ride. Position is approximate.</p><div class="grid"></div>`;
-    const g=el.querySelector('.grid');
-    a.ph.forEach((f,i)=>{const im=new Image();im.loading='lazy';im.src='photos/'+f;im.alt='Photo from the ride on '+a.d;im.onclick=()=>lbOpen(a.ph,i,a.d);g.appendChild(im)});
-    return el;
-  },{minWidth:260});
+  const mk=L.marker(a.m,{icon:L.divIcon({className:'',html:`<div class="cam" id="cam${a.i}">${camSvg}<b>${a.ph.length}</b></div>`,iconSize:[28,28],iconAnchor:[14,14]}),title:a.d+' · '+a.ph.length+' photo'+(a.ph.length>1?'s':'')});
+  mk.on('click',e=>{L.DomEvent.stopPropagation(e);select(selected===a.i?null:a.i)});
   return {a,mk};
 });
-document.getElementById('phn').textContent=DATA.reduce((s,a)=>s+(a.ph?a.ph.length:0),0);
+
 const yearEl=document.getElementById('year');
 const years=[...new Set(DATA.map(a=>a.y))].sort();
 yearEl.innerHTML='<option value="">All years</option>'+years.map(y=>`<option>${y}</option>`).join('');
-function render(){
-  const yr=yearEl.value;let shown=0;
-  lines.forEach(({a,pl})=>{
-    const vis=!yr||a.y===yr;
-    if(vis){if(!group.hasLayer(pl))group.addLayer(pl);shown++}else if(group.hasLayer(pl))group.removeLayer(pl);
-  });
+const inYear=a=>!yearEl.value||a.y===yearEl.value;
+function renderMap(){
+  let shown=0;
+  DATA.forEach(a=>{const pl=lines[a.i];if(inYear(a)){shown++;if(!group.hasLayer(pl))group.addLayer(pl)}else if(group.hasLayer(pl))group.removeLayer(pl)});
   const want=document.getElementById('showph').checked;
-  markers.forEach(({a,mk})=>{const vis=want&&(!yr||a.y===yr);if(vis){if(!phGroup.hasLayer(mk))phGroup.addLayer(mk)}else if(phGroup.hasLayer(mk))phGroup.removeLayer(mk)});
-  document.getElementById('summary').textContent=`${shown} bike rides shown`;
+  markers.forEach(({a,mk})=>{const vis=want&&inYear(a)&&(selected===null||selected===a.i);if(vis){if(!phGroup.hasLayer(mk))phGroup.addLayer(mk)}else if(phGroup.hasLayer(mk))phGroup.removeLayer(mk);
+    const el=document.getElementById('cam'+a.i);if(el)el.classList.toggle('sel',selected===a.i)});
+  document.getElementById('summary').textContent=selected===null?`${shown} bike rides shown`:`1 ride selected`;
 }
-yearEl.onchange=render;document.getElementById('showph').onchange=render;
-document.getElementById('op').oninput=e=>{opacity=+e.target.value;lines.forEach(({pl})=>pl.setStyle({opacity}))};
-document.getElementById('col').oninput=e=>{color=e.target.value;lines.forEach(({pl})=>pl.setStyle({color}))};
+function inView(a){
+  const b=map.getBounds(); if(!b.intersects(a.bb))return false;
+  for(const seg of a.p)for(const q of seg)if(b.contains(q))return true;
+  return false;
+}
+function select(i){
+  selected=i;
+  if(i!==null&&!inYear(DATA[i]))selected=null;
+  styleAll();renderMap();renderGallery();
+}
+map.on('click',()=>{if(selected!==null)select(null)});
+let flat=[];
+function renderGallery(){
+  const gl=document.getElementById('gl');gl.innerHTML='';flat=[];
+  let rides;
+  if(selected!==null)rides=[DATA[selected]];
+  else rides=DATA.filter(a=>a.ph&&inYear(a)&&inView(a)).sort((x,y)=>y.ts-x.ts);
+  rides=rides.filter(a=>a.ph&&a.ph.length);
+  const n=rides.reduce((s,a)=>s+a.ph.length,0);
+  document.getElementById('gh').textContent=selected!==null?DATA[selected].d:'Photos';
+  document.getElementById('gc').textContent=n?`${n} photo${n>1?'s':''} from ${rides.length} ride${rides.length>1?'s':''}`+(selected===null?' in view':''):'';
+  document.getElementById('gclear').hidden=selected===null;
+  if(!n){gl.innerHTML='<div class="empty">'+(selected!==null?'This ride has no photos.':'No photos on the rides in view. Zoom out or pick another year.')+'</div>';return}
+  rides.forEach(a=>{
+    const g=document.createElement('div');g.className='grp';
+    const h=document.createElement('h3');h.innerHTML='<span></span>';h.firstChild.textContent=a.d;
+    if(selected===null){const b=document.createElement('button');b.textContent='Select ride';b.onclick=()=>{select(a.i)};h.appendChild(b)}
+    g.appendChild(h);
+    const tg=document.createElement('div');tg.className='tg';
+    a.ph.forEach(f=>{const idx=flat.length;flat.push({f,a});const im=new Image();im.loading='lazy';im.src='photos/t/'+f;im.alt='Photo from the ride on '+a.d;im.onclick=()=>lbOpen(idx);tg.appendChild(im)});
+    g.appendChild(tg);gl.appendChild(g);
+  });
+  gl.scrollTop=0;
+}
+document.getElementById('gclear').onclick=()=>select(null);
+// lightbox
+const lb=document.getElementById('lb'),lbi=document.getElementById('lbi'),lbc=document.getElementById('lbc');
+let lbIdx=0;
+function lbShow(){const it=flat[lbIdx];lbi.src='photos/'+it.f;lbi.alt='Photo from the ride on '+it.a.d;lbc.textContent=it.a.d+'  ·  '+(lbIdx+1)+' / '+flat.length;document.getElementById('lbr').hidden=selected===it.a.i}
+function lbOpen(i){lbIdx=i;lbShow();lb.hidden=false}
+document.getElementById('lbp').onclick=()=>{lbIdx=(lbIdx+flat.length-1)%flat.length;lbShow()};
+document.getElementById('lbn').onclick=()=>{lbIdx=(lbIdx+1)%flat.length;lbShow()};
+document.getElementById('lbx').onclick=()=>{lb.hidden=true};
+document.getElementById('lbr').onclick=()=>{const a=flat[lbIdx].a;lb.hidden=true;map.fitBounds(a.bb,{maxZoom:14,padding:[40,40]});select(a.i)};
+lb.addEventListener('click',e=>{if(e.target===lb)lb.hidden=true});
+document.addEventListener('keydown',e=>{if(lb.hidden)return;if(e.key==='Escape')lb.hidden=true;if(e.key==='ArrowLeft')document.getElementById('lbp').click();if(e.key==='ArrowRight')document.getElementById('lbn').click()});
+// controls
+yearEl.onchange=()=>{if(selected!==null&&!inYear(DATA[selected]))selected=null;styleAll();renderMap();renderGallery()};
+document.getElementById('showph').onchange=renderMap;
+document.getElementById('op').oninput=e=>{opacity=+e.target.value;styleAll()};
+document.getElementById('col').oninput=e=>{color=e.target.value;styleAll()};
+let t=null;map.on('moveend',()=>{clearTimeout(t);t=setTimeout(()=>{if(selected===null)renderGallery()},120)});
 const lats=[],lons=[];DATA.forEach(a=>a.p.flat().forEach(p=>{lats.push(p[0]);lons.push(p[1])}));
 const q=(arr,f)=>{const s=[...arr].sort((x,y)=>x-y);return s[Math.floor(f*(s.length-1))]};
 const home=[[q(lats,0.1),q(lons,0.1)],[q(lats,0.9),q(lons,0.9)]];
 document.getElementById('home').onclick=()=>map.fitBounds(home);
 document.getElementById('all').onclick=()=>map.fitBounds([[Math.min(...lats),Math.min(...lons)],[Math.max(...lats),Math.max(...lons)]]);
-map.fitBounds(home);render();
+map.fitBounds(home);styleAll();renderMap();renderGallery();
 </script></body></html>
