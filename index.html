@@ -678,6 +678,30 @@ button{cursor:pointer;max-width:none}button:hover{background:#f0f2f5}
 input[type=range]{width:110px}
 .chk{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-top:8px}
 .note{font-size:11px;color:var(--muted);margin-top:4px}
+.panel{max-height:calc(100% - 24px);overflow:auto}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.ph .t{flex:1;min-width:0}
+.pt{padding:2px 8px;font-size:12px;max-width:none;flex:none}
+.panel.min .sub{margin-bottom:0}
+.panel.min #pb{display:none}
+.lnk{display:block;border:0;background:none;padding:2px 0 0;color:var(--accent);font-size:12px;cursor:pointer;max-width:none}
+.lnk:hover{background:none;text-decoration:underline}
+.lnk[hidden]{display:none}
+/* two-handle range sliders */
+.rg{margin-top:10px}
+.rg .rh{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;color:var(--muted)}
+.rg .rh b{font-weight:600;color:var(--ink)}
+.rs{position:relative;height:22px}
+.rs .rt{position:absolute;left:8px;right:8px;top:9px;height:4px;border-radius:2px;background:var(--line)}
+.rs .rf{position:absolute;top:0;bottom:0;background:var(--accent);border-radius:2px}
+.rs input[type=range]{position:absolute;left:0;top:0;width:100%;height:22px;margin:0;background:none;pointer-events:none;-webkit-appearance:none;appearance:none}
+.rs input[type=range]::-webkit-slider-runnable-track{background:none;height:22px}
+.rs input[type=range]::-moz-range-track{background:none}
+.rs input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;box-sizing:border-box;pointer-events:auto;width:16px;height:16px;margin-top:3px;border-radius:50%;background:#fff;border:2px solid var(--accent);cursor:pointer;box-shadow:0 1px 3px #0003}
+.rs input[type=range]::-moz-range-thumb{box-sizing:border-box;pointer-events:auto;width:16px;height:16px;border-radius:50%;background:#fff;border:2px solid var(--accent);cursor:pointer;box-shadow:0 1px 3px #0003}
+.rs input[type=range]:focus-visible{outline:none}
+.rs input[type=range]:focus-visible::-webkit-slider-thumb{outline:2px solid #e8590c66;outline-offset:2px}
+.rs input[type=range]:focus-visible::-moz-range-thumb{outline:2px solid #e8590c66;outline-offset:2px}
 .leaflet-top.leaflet-left{top:0}
 .cam{width:28px;height:28px;border-radius:50%;background:#1d2433;border:2px solid #fff;box-shadow:0 1px 5px #0006;display:flex;align-items:center;justify-content:center;position:relative}
 .cam svg{width:14px;height:14px;fill:none;stroke:#fff;stroke-width:2;stroke-linejoin:round}
@@ -730,7 +754,8 @@ input[type=range]{width:110px}
   #gl{display:flex;gap:14px;overflow-x:auto;overflow-y:hidden;padding:8px 12px}
   .grp{margin:0;flex:none}
   .tg{display:flex}.tg img{width:96px;height:72px;aspect-ratio:auto}
-  .panel{left:12px;top:56px;max-width:calc(100% - 24px)}
+  .panel{left:12px;top:56px;max-width:calc(100% - 24px);max-height:calc(100% - 250px)}
+  body.sel .panel{max-height:calc(100% - 392px)}
   #gal header{flex-direction:row;align-items:center;flex-wrap:wrap;gap:2px 10px;padding:8px 12px}
   #gal .clear{margin:0 0 0 auto}
   body.sel #gal{height:312px}
@@ -742,16 +767,21 @@ input[type=range]{width:110px}
 }
 </style></head><body>
 <div id="map"></div>
-<div class="panel">
-  <h1>Strava Bike Map</h1>
-  <div class="sub" id="summary"></div>
+<div class="panel" id="panel">
+  <div class="ph"><div class="t"><h1>Strava Bike Map</h1>
+    <div class="sub"><span id="summary"></span><button class="lnk" id="reset" hidden>Reset filters</button></div></div>
+    <button class="pt" id="pt" aria-controls="pb" aria-expanded="true" title="Show or hide the controls">Hide</button></div>
+  <div id="pb">
   <label class="f">Map <select id="base"></select></label>
   <label class="f">Year <select id="year"></select></label>
+  <div class="rg" id="rgL"></div>
+  <div class="rg" id="rgC"></div>
   <label class="f">Line opacity <input id="op" type="range" min="0.1" max="1" step="0.05" value="0.5"></label>
   <label class="f">Line color <input id="col" type="color" value="#e8590c"></label>
   <label class="chk"><input id="showph" type="checkbox" checked> <span>Photo pins</span></label>
   <div class="note">Photo pins sit near the middle of each ride, not at the exact spot.</div>
   <div class="btns"><button id="home">Main area</button><button id="all">Show all</button></div>
+  </div>
 </div>
 <aside id="gal"><header><h2 id="gh">Photos</h2><div class="cnt" id="gc"></div><button class="clear" id="gclear" hidden>Show all rides</button></header><div id="gl"></div></aside>
 <div id="lb" hidden><img id="lbi" alt=""><div class="bar"><button id="lbp">Prev</button><span id="lbc"></span><button id="lbn">Next</button><button id="lbr">Show ride</button><button id="lbx">Close</button></div></div>
@@ -815,14 +845,46 @@ const markers=DATA.filter(a=>a.ph&&a.ph.length).map(a=>{
 const yearEl=document.getElementById('year');
 const years=[...new Set(DATA.map(a=>a.y))].sort();
 yearEl.innerHTML='<option value="">All years</option>'+years.map(y=>`<option>${y}</option>`).join('');
-const inYear=a=>!yearEl.value||a.y===yearEl.value;
+// two-handle range slider (min..max), built from two overlapping <input type=range>
+function mkRange(host,label,unit,lo,hi,step,onchange){
+  host.innerHTML='<div class="rh"><span></span><b></b></div><div class="rs"><div class="rt"><div class="rf"></div></div><input type="range"><input type="range"></div>';
+  host.querySelector('.rh span').textContent=label;
+  const val=host.querySelector('b'),fill=host.querySelector('.rf'),[a,b]=host.querySelectorAll('input');
+  [a,b].forEach(x=>{x.min=lo;x.max=hi;x.step=step});
+  a.value=lo;b.value=hi;a.setAttribute('aria-label',label+', minimum');b.setAttribute('aria-label',label+', maximum');
+  const n=v=>(+v).toLocaleString('en-US');
+  const r={get v0(){return +a.value},get v1(){return +b.value},active:()=>+a.value>lo||+b.value<hi,
+    reset(){a.value=lo;b.value=hi;paint()}};
+  function paint(){
+    const p0=(a.value-lo)/(hi-lo)*100,p1=(b.value-lo)/(hi-lo)*100;
+    fill.style.left=p0+'%';fill.style.right=(100-p1)+'%';
+    a.style.zIndex=p0>50?3:1;b.style.zIndex=2;        // keep the handle that can still move on top
+    val.textContent=!r.active()?'All':(r.v0<=lo?'up to '+n(r.v1):(r.v1>=hi?n(r.v0)+'+':n(r.v0)+'–'+n(r.v1)))+' '+unit;
+  }
+  a.addEventListener('input',()=>{if(+a.value>+b.value)a.value=b.value;paint();onchange()});
+  b.addEventListener('input',()=>{if(+b.value<+a.value)b.value=a.value;paint();onchange()});
+  paint();return r;
+}
+const maxK=Math.ceil(Math.max(...DATA.map(a=>a.k||0))),maxG=Math.ceil(Math.max(...DATA.map(a=>a.g||0))/50)*50;
+let ft=null;
+function refresh(){if(ft)return;ft=setTimeout(()=>{ft=null;applyFilters()},70)}   // throttled while dragging
+const rL=mkRange(document.getElementById('rgL'),'Length','km',0,maxK,1,refresh);
+const rC=mkRange(document.getElementById('rgC'),'Climb','m',0,maxG,50,refresh);
+const passes=a=>(!yearEl.value||a.y===yearEl.value)&&(a.k==null||(a.k>=rL.v0&&a.k<=rL.v1))&&(a.g==null||(a.g>=rC.v0&&a.g<=rC.v1));
+const filtersOn=()=>!!yearEl.value||rL.active()||rC.active();
+function applyFilters(){
+  if(selected!==null&&!passes(DATA[selected]))selected=null;
+  styleAll();renderMap();renderGallery();
+}
 function renderMap(){
   let shown=0;
-  DATA.forEach(a=>{const pl=lines[a.i];if(inYear(a)){shown++;if(!group.hasLayer(pl))group.addLayer(pl)}else if(group.hasLayer(pl))group.removeLayer(pl)});
+  DATA.forEach(a=>{const pl=lines[a.i];if(passes(a)){shown++;if(!group.hasLayer(pl))group.addLayer(pl)}else if(group.hasLayer(pl))group.removeLayer(pl)});
   const want=document.getElementById('showph').checked;
-  markers.forEach(({a,mk})=>{const vis=want&&inYear(a)&&(selected===null||selected===a.i);if(vis){if(!phGroup.hasLayer(mk))phGroup.addLayer(mk)}else if(phGroup.hasLayer(mk))phGroup.removeLayer(mk);
+  markers.forEach(({a,mk})=>{const vis=want&&passes(a)&&(selected===null||selected===a.i);if(vis){if(!phGroup.hasLayer(mk))phGroup.addLayer(mk)}else if(phGroup.hasLayer(mk))phGroup.removeLayer(mk);
     const el=document.getElementById('cam'+a.i);if(el)el.classList.toggle('sel',selected===a.i)});
-  document.getElementById('summary').textContent=selected===null?`${shown} bike rides shown`:`1 ride selected`;
+  const on=filtersOn();
+  document.getElementById('summary').textContent=selected!==null?'1 ride selected':(on?`${shown} of ${DATA.length} bike rides shown`:`${shown} bike rides shown`);
+  document.getElementById('reset').hidden=!on;
 }
 function inView(a){
   const b=map.getBounds(); if(!b.intersects(a.bb))return false;
@@ -831,7 +893,7 @@ function inView(a){
 }
 function select(i){
   selected=i;
-  if(i!==null&&!inYear(DATA[i]))selected=null;
+  if(i!==null&&!passes(DATA[i]))selected=null;
   styleAll();renderMap();renderGallery();
 }
 map.on('click',()=>{if(selected!==null)select(null)});
@@ -951,13 +1013,13 @@ function renderGallery(){
   if(selected!==null){const dt=buildDetail(DATA[selected]);gl.appendChild(dt.el);dt.draw()}
   let rides;
   if(selected!==null)rides=[DATA[selected]];
-  else rides=DATA.filter(a=>a.ph&&inYear(a)&&inView(a)).sort((x,y)=>y.ts-x.ts);
+  else rides=DATA.filter(a=>a.ph&&passes(a)&&inView(a)).sort((x,y)=>y.ts-x.ts);
   rides=rides.filter(a=>a.ph&&a.ph.length);
   const n=rides.reduce((s,a)=>s+a.ph.length,0);
   document.getElementById('gh').textContent=selected!==null?DATA[selected].d:'Photos';
   document.getElementById('gc').textContent=n?`${n} photo${n>1?'s':''} from ${rides.length} ride${rides.length>1?'s':''}`+(selected===null?' in view':''):'';
   document.getElementById('gclear').hidden=selected===null;
-  if(!n){const em=document.createElement('div');em.className='empty';em.textContent=selected!==null?'This ride has no photos.':'No photos on the rides in view. Zoom out or pick another year.';gl.appendChild(em);return}
+  if(!n){const em=document.createElement('div');em.className='empty';em.textContent=selected!==null?'This ride has no photos.':'No photos on the rides in view. Zoom out or loosen the filters.';gl.appendChild(em);return}
   rides.forEach(a=>{
     const g=document.createElement('div');g.className='grp';
     const h=document.createElement('h3');h.innerHTML='<span></span>';h.firstChild.textContent=a.d;
@@ -982,7 +1044,14 @@ document.getElementById('lbr').onclick=()=>{const a=flat[lbIdx].a;lb.hidden=true
 lb.addEventListener('click',e=>{if(e.target===lb)lb.hidden=true});
 document.addEventListener('keydown',e=>{if(lb.hidden)return;if(e.key==='Escape')lb.hidden=true;if(e.key==='ArrowLeft')document.getElementById('lbp').click();if(e.key==='ArrowRight')document.getElementById('lbn').click()});
 // controls
-yearEl.onchange=()=>{if(selected!==null&&!inYear(DATA[selected]))selected=null;styleAll();renderMap();renderGallery()};
+yearEl.onchange=applyFilters;
+document.getElementById('reset').onclick=()=>{yearEl.value='';rL.reset();rC.reset();applyFilters()};
+// collapsible control panel (starts collapsed on phones)
+const panel=document.getElementById('panel'),pt=document.getElementById('pt');
+function setMin(m){panel.classList.toggle('min',m);pt.textContent=m?'Show':'Hide';pt.setAttribute('aria-expanded',String(!m));try{localStorage.setItem('pmin',m?'1':'0')}catch(e){}}
+let pm=null;try{pm=localStorage.getItem('pmin')}catch(e){}
+setMin(pm===null?matchMedia('(max-width:760px)').matches:pm==='1');
+pt.onclick=()=>setMin(!panel.classList.contains('min'));
 document.getElementById('showph').onchange=renderMap;
 document.getElementById('op').oninput=e=>{opacity=+e.target.value;styleAll()};
 document.getElementById('col').oninput=e=>{color=e.target.value;styleAll()};
